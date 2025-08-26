@@ -31,10 +31,17 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'src/package-lock.json'
 
+      - name: Configure npm
+        run: |
+          npm config set registry https://registry.npmjs.org/
+          npm config set fetch-retries 3
+          npm config set fetch-retry-mintimeout 5000
+          npm config set fetch-retry-maxtimeout 60000
+
       - name: Install dependencies
         run: |
           cd src
-          npm ci
+          npm install --no-audit --no-fund
 
       - name: Run tests
         run: |
@@ -79,10 +86,17 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'src/package-lock.json'
 
+      - name: Configure npm
+        run: |
+          npm config set registry https://registry.npmjs.org/
+          npm config set fetch-retries 3
+          npm config set fetch-retry-mintimeout 5000
+          npm config set fetch-retry-maxtimeout 60000
+
       - name: Install dependencies
         run: |
           cd src
-          npm ci
+          npm install --no-audit --no-fund
 
       - name: Build function
         run: |
