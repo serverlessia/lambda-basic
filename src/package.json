@@ -1,0 +1,28 @@
+{
+  "name": "lambda-basic",
+  "version": "1.0.0",
+  "description": "Basic AWS Lambda function",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test-local.js",
+    "build": "echo 'Build completed - no compilation needed for Node.js'",
+    "package": "zip -r function.zip . -x 'node_modules/*' '*.zip' 'package-lock.json'",
+    "deploy": "npm run package && echo 'Function packaged as function.zip'"
+  },
+  "keywords": [
+    "aws",
+    "lambda",
+    "serverless"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.1574.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

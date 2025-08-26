@@ -1,0 +1,22 @@
+{
+  "name": "lambda-basic-workspace",
+  "version": "1.0.0",
+  "description": "Workspace for Lambda Basic function",
+  "private": true,
+  "scripts": {
+    "install:lambda": "cd src && npm install",
+    "build": "cd src && npm run build",
+    "package": "cd src && npm run package",
+    "test": "cd src && npm test",
+    "clean": "rm -rf src/function.zip dist/",
+    "prepare": "echo 'Workspace ready'"
+  },
+  "keywords": [
+    "aws",
+    "lambda",
+    "serverless",
+    "workspace"
+  ],
+  "author": "John Ajera",
+  "license": "MIT"
+}

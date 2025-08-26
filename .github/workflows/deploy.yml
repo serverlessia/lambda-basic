@@ -1,0 +1,124 @@
+name: Build and Release Lambda
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+env:
+  FUNCTION_NAME: lambda-basic
+  RUNTIME: nodejs20.x
+  HANDLER: index.handler
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  validate:
+    name: Validate and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'src/package-lock.json'
+
+      - name: Install dependencies
+        run: |
+          cd src
+          npm ci
+
+      - name: Run tests
+        run: |
+          cd src
+          npm test
+
+      - name: Build function
+        run: |
+          cd src
+          npm run build
+
+      - name: Package function
+        run: |
+          cd src
+          npm run package
+
+      - name: Verify package
+        run: |
+          if [ ! -f "src/function.zip" ]; then
+            echo "❌ Package file not created"
+            exit 1
+          fi
+          echo "✅ Package file created successfully"
+          ls -la src/function.zip
+
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'src/package-lock.json'
+
+      - name: Install dependencies
+        run: |
+          cd src
+          npm ci
+
+      - name: Build function
+        run: |
+          cd src
+          npm run build
+
+      - name: Package function
+        run: |
+          cd src
+          npm run package
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: src/function.zip
+          tag_name: v${{ github.run_number }}
+          name: Release v${{ github.run_number }}
+          body: |
+            ## Lambda Function Release
+
+            **Function:** ${{ env.FUNCTION_NAME }}
+            **Runtime:** ${{ env.RUNTIME }}
+            **Handler:** ${{ env.HANDLER }}
+
+            ### Installation
+            1. Download the `function.zip` file
+            2. Upload to AWS Lambda console or use AWS CLI
+            3. Set handler to: `index.handler`
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tag Latest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -f latest
+          git push origin latest --force
